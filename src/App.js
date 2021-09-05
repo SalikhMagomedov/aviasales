@@ -1,11 +1,39 @@
 import './App.css';
 import axios from "axios";
 import React, {useState, useEffect} from "react";
+import {Checkbox, FormControlLabel, FormGroup} from "@material-ui/core";
 
 const App = () => {
 
     const [searchId, setSearchId] = useState(null);
     const [tickets, setTickets] = useState([]);
+    const [filters, setFilters] = useState({
+        'All': {
+            'checked': false,
+            'value': 0
+        },
+        'Without': {
+            'checked': false,
+            'value': 0
+        },
+        'One': {
+            'checked': false,
+            'value': 1
+        },
+        'Two': {
+            'checked': false,
+            'value': 2
+        },
+        'Three': {
+            'checked': false,
+            'value': 3
+        }
+    });
+    const [active, setActive] = useState([]);
+
+    const handleChange = (e) => {
+        setFilters({...filters, [e.target.name]: {'checked': e.target.checked, 'value': filters[e.target.name].value}});
+    };
 
     useEffect(() => {
         (async () => {
@@ -41,12 +69,28 @@ const App = () => {
         })();
     }, []);
 
+    useEffect(() => {
+        setActive(Object.keys(filters).filter(k => filters[k].checked).map(k => filters[k].value));
+    }, [filters])
+
     return (
         <div>
             <p>SearchID: {searchId}</p>
+            <p>Filters:</p>
+            <FormGroup row>
+                {Object.keys(filters).map((k, i) =>
+                    <FormControlLabel
+                        control={<Checkbox checked={filters.k} onChange={handleChange} name={k} key={k}/>}
+                        label={k}
+                        key={i}
+                    />
+                )}
+            </FormGroup>
             <p>Tickets:</p>
             <ul>
-                {tickets.map((t, i) =>
+                {tickets
+                    .filter(t => active.includes(t.segments[0].stops.length))
+                    .map((t, i) =>
                     <li key={i}>
                         <p>{t.price} ({t.carrier})</p>
                         {t.segments.map((s, j) =>
